@@ -34,3 +34,56 @@ val_gen =val_datagen.flow_from_directory(directory=valdir, target_size=imgsize, 
 
 print("Class indices:", train_gen.class_indices)
 print("Train samples:", train_gen.n, "| Val samples:", val_gen.n)
+
+#2 NN Design
+from tensorflow.keras import models,layers, optimizers, callbacks
+
+#Design for Model A
+
+def build_model_a(input_shape=(500,500,3),num_classes=3):
+    model=models.Sequential([
+        layers.Conv2D(32,(3,3),activation='relu',input_shape=input_shape), layers.Conv2D(64, (3,3), activation='relu'),
+        layers.MaxPooling2D((2,2)),
+        layers.Flatten(),
+        layers.Dense(128, activation='relu'),
+        layers.Dropout(0.3),
+        layers.Dense(num_classes, activation='softmax')
+        ])
+   
+    model.compile(
+        optimizer=optimizers.Adam(learning_rate=1e-4),
+        loss='categorical_crossentropy',
+        metrics=['accuracy']
+        )
+    return model
+
+#Design for Model B
+def build_model_b(input_shape=(500,500,3),num_classes=3):
+    model=models.Sequential([
+        layers.Conv2D(32,(3,3),activation='relu', input_shape=input_shape),
+        layers.Conv2D(32,(3,3),activation='relu'),
+        layers.MaxPooling2D((2,2)),
+        layers.Dropout(0.25),
+        
+        layers.Conv2D(64,(3,3),activation='relu'),
+        layers.Conv2D(64,(3,3), activation='relu'),
+        layers.MaxPooling2D((2,2)),
+        layers.Dropout(0.25),
+        
+        layers.Flatten(),
+        layers.Dense(256, activation='relu'),
+        layers.Dropout(0.5),
+        layers.Dense(num_classes, activation='softmax')
+        ])
+    
+    model.compile(optimizer=optimizers.Adam(learning_rate=1e-4), loss='categorical_crossentropy', metrics=['accuracy'])
+
+    return model
+
+#building both models
+model_a= build_model_a(num_classes=train_gen.num_classes)
+model_b= build_model_b(num_classes=train_gen.num_classes)
+
+model_a.summary()
+model_b.summary()
+
