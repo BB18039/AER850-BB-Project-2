@@ -36,7 +36,6 @@ print("Class indices:", train_gen.class_indices)
 print("Train samples:", train_gen.n, "| Val samples:", val_gen.n)
 
 #2 NN Design
-from tensorflow.keras import models,layers, optimizers, callbacks
 
 #Design for Model A
 
@@ -87,3 +86,38 @@ model_b= build_model_b(num_classes=train_gen.num_classes)
 model_a.summary()
 model_b.summary()
 
+#Hyperparameter Analysis
+import json
+
+#Training settings
+EPOCHS= 30
+steps_per_epoch= train_gen.n//train_gen.batch_size
+valsteps=val_gen.n//val_gen.batch_size
+
+
+
+
+cba=[callbacks.EarlyStopping(monitor="val_accuracy",patience=5,restore_best_weights=True),
+     callbacks.ReduceLROnPlateau(monitor="val_loss", factor=0.5, patience=2, verbose=1),
+     callbacks.ModelCheckpoint("best_model_a.h5", monitor="val_accuracy",save_best_only=True, verbose=1)]
+
+cbb=[callbacks.EarlyStopping(monitor="val_accuracy", patience=5, restore_best_weights=True),
+    callbacks.ReduceLROnPlateau(monitor="val_loss", factor=0.5, patience=2, verbose=1),
+    callbacks.ModelCheckpoint("best_model_b.h5", monitor="val_accuracy", save_best_only=True, verbose=1)]
+
+print("\nTraining Model A...")
+hist_a=model_a.fit(train_gen, epochs=EPOCHS, steps_per_epoch=steps_per_epoch, validation_data=val_gen, validation_steps=valsteps, callbacks=cba, verbose=1)
+
+print("\nTraining Model B")
+hist_b=model_b.fit(train_gen, epochs=EPOCHS, steps_per_epoch=steps_per_epoch, validation_data=val_gen, validation_steps=valsteps, callbacks=cbb, verbose=1)
+
+#saving class index mapping for step 5
+with open ("class_indices.json", "w") as f:
+    json.dump(train_gen.class_indices, f)
+
+#outputting comparison metric
+bestvalacc_a=max(hist_a.history["val_accuracy"])
+bestvalacc_b=max(hist_a.history["val_accuracy"])
+
+print(f"\nBest Val Acc --> Model A: {bestvalacc_a:.4f} | Model B: {bestvalacc_b:.4f}")
+print ("Saved: best_model_a.h5, best_model_b.h5,class_indices.json")
