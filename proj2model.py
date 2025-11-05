@@ -121,3 +121,5 @@ bestvalacc_b=max(hist_a.history["val_accuracy"])
 
 print(f"\nBest Val Acc --> Model A: {bestvalacc_a:.4f} | Model B: {bestvalacc_b:.4f}")
 print ("Saved: best_model_a.h5, best_model_b.h5,class_indices.json")
+
+#Test
