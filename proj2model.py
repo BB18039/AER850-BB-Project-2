@@ -37,89 +37,111 @@ print("Train samples:", train_gen.n, "| Val samples:", val_gen.n)
 
 #2 NN Design
 
-#Design for Model A
+# #Design for Model A
 
-def build_model_a(input_shape=(500,500,3),num_classes=3):
-    model=models.Sequential([
-        layers.Conv2D(32,(3,3),activation='relu',input_shape=input_shape), layers.Conv2D(64, (3,3), activation='relu'),
-        layers.MaxPooling2D((2,2)),
-        layers.Flatten(),
-        layers.Dense(128, activation='relu'),
-        layers.Dropout(0.3),
-        layers.Dense(num_classes, activation='softmax')
-        ])
+# def build_model_a(input_shape=(500,500,3),num_classes=3):
+#     model=models.Sequential([
+#         layers.Conv2D(32,(3,3),activation='relu',input_shape=input_shape), layers.Conv2D(64, (3,3), activation='relu'),
+#         layers.MaxPooling2D((2,2)),
+#         layers.Flatten(),
+#         layers.Dense(128, activation='relu'),
+#         layers.Dropout(0.3),
+#         layers.Dense(num_classes, activation='softmax')
+#         ])
    
-    model.compile(
-        optimizer=optimizers.Adam(learning_rate=1e-4),
-        loss='categorical_crossentropy',
-        metrics=['accuracy']
-        )
-    return model
+#     model.compile(
+#         optimizer=optimizers.Adam(learning_rate=1e-4),
+#         loss='categorical_crossentropy',
+#         metrics=['accuracy']
+#         )
+#     return model
 
-#Design for Model B
-def build_model_b(input_shape=(500,500,3),num_classes=3):
-    model=models.Sequential([
-        layers.Conv2D(32,(3,3),activation='relu', input_shape=input_shape),
-        layers.Conv2D(32,(3,3),activation='relu'),
-        layers.MaxPooling2D((2,2)),
-        layers.Dropout(0.25),
+# #Design for Model B
+# def build_model_b(input_shape=(500,500,3),num_classes=3):
+#     model=models.Sequential([
+#         layers.Conv2D(32,(3,3),activation='relu', input_shape=input_shape),
+#         layers.Conv2D(32,(3,3),activation='relu'),
+#         layers.MaxPooling2D((2,2)),
+#         layers.Dropout(0.25),
         
-        layers.Conv2D(64,(3,3),activation='relu'),
-        layers.Conv2D(64,(3,3), activation='relu'),
-        layers.MaxPooling2D((2,2)),
-        layers.Dropout(0.25),
+#         layers.Conv2D(64,(3,3),activation='relu'),
+#         layers.Conv2D(64,(3,3), activation='relu'),
+#         layers.MaxPooling2D((2,2)),
+#         layers.Dropout(0.25),
         
-        layers.Flatten(),
-        layers.Dense(256, activation='relu'),
-        layers.Dropout(0.5),
-        layers.Dense(num_classes, activation='softmax')
-        ])
+#         layers.Flatten(),
+#         layers.Dense(256, activation='relu'),
+#         layers.Dropout(0.5),
+#         layers.Dense(num_classes, activation='softmax')
+#         ])
     
-    model.compile(optimizer=optimizers.Adam(learning_rate=1e-4), loss='categorical_crossentropy', metrics=['accuracy'])
+#     model.compile(optimizer=optimizers.Adam(learning_rate=1e-4), loss='categorical_crossentropy', metrics=['accuracy'])
 
-    return model
+#     return model
 
-#building both models
-model_a= build_model_a(num_classes=train_gen.num_classes)
-model_b= build_model_b(num_classes=train_gen.num_classes)
+# #building both models
+# model_a= build_model_a(num_classes=train_gen.num_classes)
+# model_b= build_model_b(num_classes=train_gen.num_classes)
 
-model_a.summary()
-model_b.summary()
+# model_a.summary()
+# model_b.summary()
 
-#Hyperparameter Analysis
-import json
+#3 Hyperparameter Analysis
+#import json
 
-#Training settings
-EPOCHS= 30
-steps_per_epoch= train_gen.n//train_gen.batch_size
-valsteps=val_gen.n//val_gen.batch_size
+# #Training settings
+# EPOCHS= 30
+# steps_per_epoch= train_gen.n//train_gen.batch_size
+# valsteps=val_gen.n//val_gen.batch_size
+   
 
+# cba=[callbacks.EarlyStopping(monitor="val_accuracy",patience=5,restore_best_weights=True),
+#      callbacks.ReduceLROnPlateau(monitor="val_loss", factor=0.5, patience=2, verbose=1),
+#      callbacks.ModelCheckpoint("best_model_a.h5", monitor="val_accuracy",save_best_only=True, verbose=1)]
 
+# cbb=[callbacks.EarlyStopping(monitor="val_accuracy", patience=5, restore_best_weights=True),
+#     callbacks.ReduceLROnPlateau(monitor="val_loss", factor=0.5, patience=2, verbose=1),
+#     callbacks.ModelCheckpoint("best_model_b.h5", monitor="val_accuracy", save_best_only=True, verbose=1)]
 
+# print("\nTraining Model A...")
+# hist_a=model_a.fit(train_gen, epochs=EPOCHS, steps_per_epoch=steps_per_epoch, validation_data=val_gen, validation_steps=valsteps, callbacks=cba, verbose=1)
 
-cba=[callbacks.EarlyStopping(monitor="val_accuracy",patience=5,restore_best_weights=True),
-     callbacks.ReduceLROnPlateau(monitor="val_loss", factor=0.5, patience=2, verbose=1),
-     callbacks.ModelCheckpoint("best_model_a.h5", monitor="val_accuracy",save_best_only=True, verbose=1)]
+# print("\nTraining Model B")
+# hist_b=model_b.fit(train_gen, epochs=EPOCHS, steps_per_epoch=steps_per_epoch, validation_data=val_gen, validation_steps=valsteps, callbacks=cbb, verbose=1)
 
-cbb=[callbacks.EarlyStopping(monitor="val_accuracy", patience=5, restore_best_weights=True),
-    callbacks.ReduceLROnPlateau(monitor="val_loss", factor=0.5, patience=2, verbose=1),
-    callbacks.ModelCheckpoint("best_model_b.h5", monitor="val_accuracy", save_best_only=True, verbose=1)]
+# #saving class index mapping for step 5
+# with open ("class_indices.json", "w") as f:
+#     json.dump(train_gen.class_indices, f)
 
-print("\nTraining Model A...")
-hist_a=model_a.fit(train_gen, epochs=EPOCHS, steps_per_epoch=steps_per_epoch, validation_data=val_gen, validation_steps=valsteps, callbacks=cba, verbose=1)
+# #outputting comparison metric
+# bestvalacc_a=max(hist_a.history["val_accuracy"])
+# bestvalacc_b=max(hist_a.history["val_accuracy"])
 
-print("\nTraining Model B")
-hist_b=model_b.fit(train_gen, epochs=EPOCHS, steps_per_epoch=steps_per_epoch, validation_data=val_gen, validation_steps=valsteps, callbacks=cbb, verbose=1)
+# print(f"\nBest Val Acc --> Model A: {bestvalacc_a:.4f} | Model B: {bestvalacc_b:.4f}")
+# print ("Saved: best_model_a.h5, best_model_b.h5,class_indices.json")
 
-#saving class index mapping for step 5
-with open ("class_indices.json", "w") as f:
-    json.dump(train_gen.class_indices, f)
+#Step 4 Model Evaluation
+def plot_history(history, title_prefix):
+   
+    #Accuracy plot
+    plt.figure()
+    plt.plot(history.history['accuracy'], label='Train')
+    plt.plot(history.history['val accuracy'],label='Val')
+    plt.xlabel ('Epoch');plt.ylabel('Accuracy');plt.title(f'{title_prefix} Accuracy')
+    plt.legend();plt.grid(True);plt.tight_layout()
+    plt.savefig(f"{title_prefix.lower().replace(' ','_')}_loss.png", dpi=160)
+    plt.show()
 
-#outputting comparison metric
-bestvalacc_a=max(hist_a.history["val_accuracy"])
-bestvalacc_b=max(hist_a.history["val_accuracy"])
-
-print(f"\nBest Val Acc --> Model A: {bestvalacc_a:.4f} | Model B: {bestvalacc_b:.4f}")
-print ("Saved: best_model_a.h5, best_model_b.h5,class_indices.json")
-
-#Test
+    #Loss plot
+    plt.figure()
+    plt.plot(history.history['loss'],label='Train')
+    plt.plot(history.history['val_loss'], label='Val')
+    plt.xlabel('Epoch');plt.grid(True);plt.title(f'{title_prefix} Loss')
+    plt.legend;plt.grid(True);plt.tight_layout()
+    plt.savefig(f"{title_prefix.lower().replace(' ','_')}_loss.png",dpi=160)
+    plt.show()
+    
+    
+    plot_history(hist_a,"Model A")
+    plot_history(hist_b, "Model B")
+    
